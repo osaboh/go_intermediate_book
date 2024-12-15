@@ -1,0 +1,22 @@
+version: '3'
+
+tasks:
+  hello:
+    cmds:
+      - echo 'Hello World from Task!'
+    silent: true
+
+
+  run:
+    cmds:
+      - go run main.go
+
+  test:
+    cmds:
+      - curl localhost:8080/hello
+      - curl localhost:8080/article -X POST
+      - curl localhost:8080/article/list
+      - curl localhost:8080/article/1
+      - curl localhost:8080/article/2
+      - curl localhost:8080/article/nice -X POST
+      - curl localhost:8080/comment -X POST
