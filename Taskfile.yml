@@ -14,9 +14,9 @@ tasks:
   test:
     cmds:
       - curl localhost:8080/hello
-      - curl localhost:8080/article -X POST
+      - curl -s http://localhost:8080/article     -X POST -d '{"title":"a", "contents":"b", "user_name":"c"}'
       - curl localhost:8080/article/list
       - curl localhost:8080/article/1
       - curl localhost:8080/article/2
-      - curl localhost:8080/article/nice -X POST
-      - curl localhost:8080/comment -X POST
+      - curl -s http://localhost:8080/article/nice -X POST -d '{"title":"a", "contents":"b", "user_name":"c"}'
+      - curl -s http://localhost:8080/comment      -X POST -d '{"article_id":1, "message":"first comment"}'
