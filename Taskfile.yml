@@ -11,6 +11,14 @@ tasks:
     cmds:
       - go run main.go
 
+  pod:
+    cmds:
+      - cd Pod; podman-compose -p go_http_book up --detach
+
+  pod-rm:
+    cmds:
+      - cd Pod; podman pod stop pod_go_http_book && podman pod rm pod_go_http_book
+
   test:
     cmds:
       - curl localhost:8080/hello
