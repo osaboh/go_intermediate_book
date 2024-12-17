@@ -11,6 +11,11 @@ tasks:
     cmds:
       - go run main.go
 
+  migrate:
+    cmds:
+      - mysql -h 127.0.0.1 -u docker sampledb -p < createTable.sql
+      - mysql -h 127.0.0.1 -u docker sampledb -p < insertData.sql
+
   pod:
     cmds:
       - cd Pod; podman-compose -p go_intermediate_book up --detach

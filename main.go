@@ -6,6 +6,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	"go_intermediate_book/handlers"
+	"go_intermediate_book/models"
 	"log"
 	"net/http"
 )
@@ -24,12 +25,30 @@ func main() {
 	}
 	defer db.Close()
 
-	if err := db.Ping(); err != nil {
+	const sqlStr = `
+		SELECT title, contents, username, nice
+		FROM articles;
+	`
+	rows, err := db.Query(sqlStr)
+	if err != nil {
 		fmt.Println(err)
-	} else {
-		fmt.Println("connect to DB")
+		return
+
 	}
-	panic("ok")
+	defer rows.Close()
+
+	articleArray := make([]models.Article, 0)
+	for rows.Next() {
+		var article models.Article
+		err := rows.Scan(&article.Title, &article.Contents, &article.UserName, &article.NiceNum)
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			articleArray = append(articleArray, article)
+		}
+	}
+
+	fmt.Printf("%+v\n", articleArray)
 
 	r := mux.NewRouter()
 
