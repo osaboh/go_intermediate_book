@@ -5,7 +5,7 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
-	"go_http_book/handlers"
+	"go_intermediate_book/handlers"
 	"log"
 	"net/http"
 )

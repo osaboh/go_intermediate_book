@@ -1,4 +1,4 @@
-module go_http_book
+module go_intermediate_book
 
 go 1.22.0
 

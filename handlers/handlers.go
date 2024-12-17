@@ -3,7 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"go_http_book/models"
+	"go_intermediate_book/models"
 	"io"
 	"net/http"
 	"strconv"
