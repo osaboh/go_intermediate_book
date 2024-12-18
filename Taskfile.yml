@@ -11,6 +11,14 @@ tasks:
     cmds:
       - go run main.go
 
+  mysql:
+    vars:
+      HOST: 127.0.0.1
+      USER: docker
+      DB: sampledb
+    cmds:
+      - mysql -h {{.HOST}} -u {{.USER}} -D {{.DB}} -p
+
   migrate:
     cmds:
       - mysql -h 127.0.0.1 -u docker sampledb -p < createTable.sql
