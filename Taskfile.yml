@@ -33,12 +33,16 @@ tasks:
       - find . -name '*.sql' | xargs sqlfluff fix --dialect=mysql
 
   pod:
+    vars:
+      PROJECT: go_intermediate_book
     cmds:
-      - cd Pod; podman-compose -p go_intermediate_book up --detach
+      - cd Pod; podman-compose -p {{.PROJECT}} up --detach
 
   pod-rm:
+    vars:
+      POD: pod_go_intermediate_book
     cmds:
-      - cd Pod; podman pod stop pod_go_intermediate_book && podman pod rm pod_go_intermediate_book
+      - cd Pod; podman pod stop {{.POD}} && podman pod rm {{.POD}}
 
   test:
     cmds:
