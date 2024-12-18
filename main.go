@@ -25,30 +25,34 @@ func main() {
 	}
 	defer db.Close()
 
+	articleID := 1
 	const sqlStr = `
-		SELECT title, contents, username, nice
-		FROM articles;
+		SELECT *
+		FROM articles
+		WHERE article_id = ?;
 	`
-	rows, err := db.Query(sqlStr)
-	if err != nil {
+	row := db.QueryRow(sqlStr, articleID)
+	if err := row.Err(); err != nil {
 		fmt.Println(err)
 		return
 
 	}
-	defer rows.Close()
 
-	articleArray := make([]models.Article, 0)
-	for rows.Next() {
-		var article models.Article
-		err := rows.Scan(&article.Title, &article.Contents, &article.UserName, &article.NiceNum)
-		if err != nil {
-			fmt.Println(err)
-		} else {
-			articleArray = append(articleArray, article)
-		}
+	// DB から取得したデータを変数 article に読み出す
+	var article models.Article
+	var createdTime sql.NullTime
+	err = row.Scan(&article.ID, &article.Title, &article.Contents, &article.UserName,
+		&article.NiceNum, &createdTime)
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
 
-	fmt.Printf("%+v\n", articleArray)
+	if createdTime.Valid {
+		article.CreatedAt = createdTime.Time
+	}
+
+	fmt.Printf("%+v\n", article)
 
 	r := mux.NewRouter()
 
