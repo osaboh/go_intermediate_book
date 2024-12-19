@@ -1,54 +1,31 @@
 version: '3'
 
+dotenv: [ '.env' ]
 interval: 500ms
 
 tasks:
+  default:
+    desc: List all tasks
+    aliases:
+      - list
+    cmd: task -l
+
   hello:
     cmds:
       - echo 'Hello World from Task!'
     silent: true
 
   build:
+    desc: Build application
     cmds:
       - go build -o blog
   run:
+    desc: Run application
     cmds:
       - go run main.go
 
-  mysql:
-    vars:
-      HOST: 127.0.0.1
-      USER: docker
-      DB: sampledb
-    cmds:
-      - mysql -h {{.HOST}} -u {{.USER}} -D {{.DB}} -p
-
-  migrate:
-    cmds:
-      - mysql -h 127.0.0.1 -u docker sampledb -p < createTable.sql
-      - mysql -h 127.0.0.1 -u docker sampledb -p < insertData.sql
-
-  sqlfluff:
-    cmds:
-      - find . -name '*.sql' | xargs sqlfluff lint --dialect=mysql
-
-  sqlfluff_fix:
-    cmds:
-      - find . -name '*.sql' | xargs sqlfluff fix --dialect=mysql
-
-  pod:
-    vars:
-      PROJECT: go_intermediate_book
-    cmds:
-      - cd Pod; podman-compose -p {{.PROJECT}} up --detach
-
-  pod-rm:
-    vars:
-      POD: pod_go_intermediate_book
-    cmds:
-      - cd Pod; podman pod stop {{.POD}} && podman pod rm {{.POD}}
-
   test:
+    desc: Test application
     cmds:
       - curl localhost:8080/hello
       - curl -s http://localhost:8080/article     -X POST -d '{"title":"a", "contents":"b", "user_name":"c"}'
@@ -57,3 +34,58 @@ tasks:
       - curl localhost:8080/article/2
       - curl -s http://localhost:8080/article/nice -X POST -d '{"title":"a", "contents":"b", "user_name":"c"}'
       - curl -s http://localhost:8080/comment      -X POST -d '{"article_id":1, "message":"first comment"}'
+
+  pod:
+    desc: Control Pod
+    cmds:
+      - task -a | grep 'pod:[^ ]'
+
+  pod:create:
+    desc: Start Pod
+    vars:
+      PROJECT: go_intermediate_book
+    cmds:
+      - cd Pod; podman-compose -p {{.PROJECT}} up --detach
+
+  pod:rm:
+    desc: Remove Pod
+    vars:
+      POD: pod_go_intermediate_book
+    cmds:
+      - cd Pod; podman pod stop {{.POD}} && podman pod rm {{.POD}}
+
+  db:
+    desc: Control DB
+    cmds:
+      - task -a | grep 'db:[^ ]'
+
+  db:connect:
+    desc: Connect DB
+    cmds:
+      - mysql -h {{.DBHOST}} -u {{.USERNAME}} -D {{.DATABASE}} -p{{.USERPASS}}
+
+  db:migrate:
+    desc: Migrate DB
+    cmds:
+      - mysql -h {{.DBHOST}} -u {{.USERNAME}} -D {{.DATABASE}} -p{{.USERPASS}} < createTable.sql
+      - mysql -h {{.DBHOST}} -u {{.USERNAME}} -D {{.DATABASE}} -p{{.USERPASS}} < insertData.sql
+
+  db:dump:
+    desc: Dump DB
+    cmds:
+      - mysqldump -h {{.DBHOST}} -u {{.ROOTUSER}} -p{{.ROOTPASS}} --databases {{.DATABASE}} --flush-logs --single-transaction --source-data=2 > dump.sql
+
+  db:restore:
+    desc: Restore DB
+    cmds:
+      - mysql -h {{.DBHOST}} -u {{.ROOTUSER}} -p{{.ROOTPASS}} < dump.sql
+
+  db:lint:
+    desc: Linter SQL
+    cmds:
+      - find . -name '*.sql' | xargs sqlfluff lint --dialect=mysql
+
+  db:lint:fix:
+    desc: Linter SQL (fix mode)
+    cmds:
+      - find . -name '*.sql' | xargs sqlfluff fix --dialect=mysql
