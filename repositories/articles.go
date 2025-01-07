@@ -8,6 +8,10 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+const (
+	articleNumPerPage = 5
+)
+
 // 新規投稿を DB に登録する
 // 返り値は新規投稿内容と、発生したエラー
 func InsertArticle(db *sql.DB, article models.Article) (models.Article, error) {
@@ -35,12 +39,23 @@ func InsertArticle(db *sql.DB, article models.Article) (models.Article, error) {
 // 返り値は取得した記事データと、発生したエラー
 func SelectArticleList(db *sql.DB, page int) ([]models.Article, error) {
 	const sqlStr = `
-	SELCT article_id, title, contents, username, nice
-	FROM articles
-	LIMIT ? OFFSET ?;
+		SELCT article_id, title, contents, username, nice
+		FROM articles
+		LIMIT ? OFFSET ?;
 	`
 
+	rows, err := db.Query(sqlStr, articleNumPerPage, ((page - 1) * articleNumPerPage))
+	if err != nil {
+		return nil, err
+	}
+	defer raws.Close()
+
 	articleArray := make([]models.Article{})
+	for raws.Next() {
+		var article models.Article
+		raws.Scan(&article.ID, &article.Title, &article.Contnts, &article.UserName, &article.NiceNum)
+		articleArray = append(articleArray.article)
+	}
 
 	return articleArray, nil
 }
