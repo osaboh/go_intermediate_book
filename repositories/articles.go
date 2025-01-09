@@ -69,6 +69,31 @@ func SelectArticleDetail(db *sql.DB, articleID int) (models.Article, error) {
 		WHERE article_id = ? ;
 	`
 
+	rows := db.QueryRow(sqlStr, articleID)
+	if err := row.Err(); err != nil {
+		return models.Article{}, err
+	}
+	// QueryRow では rows.Close() 不要
+
+	var article models.Article
+	var createdTime sql.NullTime // article.CreatedAt は Null かも ?
+	err := rows.Scan(
+		&article.ID,
+		&article.Title,
+		&article.Contents,
+		&article.UserName,
+		&article.NiceNum,
+		&article.ComentList,
+		&createdTime)
+	if err != nil {
+		return models.Article{}, err
+	}
+
+	if createdTime.Valid {
+		// Null ではなかった
+		article.CreatedAt = createdTime.Time
+	}
+
 	return article, nil
 }
 
@@ -81,6 +106,41 @@ func UpdateNiceNum(db *sql.DB, articleID int) error {
 		WHERE article_id = ?;
 	`
 	const sqlUpdateNice = `UPDATE articles SET nice = ? where article_id = ?`
+
+	// トランザクション開始
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	// いいねを取得
+	rows := db.QueryRow(sqlGetNice)
+	if err := row.Err(); err != nil {
+		// トランザクション中のエラーはロールバック
+		tx.Rollback()
+		return err
+	}
+	// QueryRow では rows.Close() 不要
+
+	// いいね取得
+	var nice int
+	err := rows.Scan(&nice)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// いいねを更新
+	_, err = db.Exec(sqlUpdateNice, nice+1, articleID)
+	if err := row.Err(); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// トランザクション終了
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 
 	return nil
 }
