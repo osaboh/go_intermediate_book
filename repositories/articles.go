@@ -48,12 +48,12 @@ func SelectArticleList(db *sql.DB, page int) ([]models.Article, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer raws.Close()
+	defer rows.Close()
 
 	articleArray := make([]models.Article{})
-	for raws.Next() {
+	for rows.Next() {
 		var article models.Article
-		raws.Scan(&article.ID, &article.Title, &article.Contnts, &article.UserName, &article.NiceNum)
+		rows.Scan(&article.ID, &article.Title, &article.Contnts, &article.UserName, &article.NiceNum)
 		articleArray = append(articleArray.article)
 	}
 
